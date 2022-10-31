@@ -18,6 +18,18 @@ class BooleanArgumentMarshaler(ArgumentMarshaler):
         return bool(self.value)
 
 
+class StringArgumentMarshaler(ArgumentMarshaler):
+    value: str
+
+    def set(self, value: bool):
+        self.value = value
+
+    def getValue(self) -> bool:
+        if not self.value:
+            return ''
+        return self.value
+
+
 class Args:
     schema: str
     args: List[str]
@@ -76,7 +88,7 @@ class Args:
         return len(elementTail) == 0
 
     def parseStringSchemaElement(self, elementId: str):
-        self.stringArgs[elementId] = ""
+        self.stringArgs[elementId] = StringArgumentMarshaler()
 
     def isStringSchemaElement(self, elementTail: str) -> bool:
         return elementTail == "*"
@@ -124,7 +136,7 @@ class Args:
     def setStringArg(self, argChar: str):
         self.currentArgument += 1
         try:
-            self.stringArgs[argChar] = self.args[self.currentArgument]
+            self.stringArgs[argChar].set(self.args[self.currentArgument])
         except Exception as e:
             self.valid = False
             self.errorArgumentId = argChar
@@ -146,14 +158,12 @@ class Args:
         else:
             return False
 
-    def blankIfNull(self, s: str) -> str:
-        if s is None:
-            return ''
-        else:
-            return s
-
     def getString(self, arg: str) -> str:
-        return self.blankIfNull(self.stringArgs[arg])
+        am = self.stringArgs.get(arg, None)
+        if am:
+            return am.getValue()
+        else:
+            return ''
 
     def has(self, arg: str) -> bool:
         return arg in self.argsFound
