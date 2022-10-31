@@ -7,6 +7,7 @@ class Args:
     valid: bool = True
     unexpectedArguments: Set[str] = set()
     booleanArgs: Dict[str, bool] = dict()
+    stringArgs: Dict[str, str] = dict()
     argsFound: Set[str] = set()
     currentArgument: int
 
@@ -25,7 +26,6 @@ class Args:
             self.parseArguments()
         except Exception as e:
             print(e)
-            pass
 
         return self.valid
 
@@ -43,6 +43,8 @@ class Args:
 
         if self.isBooleanSchemaElement(elementTail):
             self.parseBooleanSchemaElement(elementId)
+        elif self.isStringSchemaElement(elementTail):
+            self.parseStringSchemaElement(elementId)
         else:
             raise Exception(f"Argument: {elementId} has invalid format: {elementTail}.")
 
@@ -55,6 +57,12 @@ class Args:
 
     def isBooleanSchemaElement(self, elementTail: str) -> bool:
         return len(elementTail) == 0
+
+    def parseStringSchemaElement(self, elementId: str):
+        self.stringArgs[elementId] = ""
+
+    def isStringSchemaElement(self, elementTail: str) -> bool:
+        return elementTail == "*"
 
     def parseArguments(self) -> bool:
         for arg in self.args:
@@ -78,9 +86,10 @@ class Args:
 
     def setArgument(self, argChar: str) -> bool:
 
-        # TODO: a new par o methods for doouble
         if self.isBooleanArg(argChar):
             self.setBooleanArg(argChar, True)
+        elif self.isStringArg(argChar):
+            self.setStringArg(argChar)
         else:
             return False
 
@@ -91,6 +100,18 @@ class Args:
 
     def isBooleanArg(self, argChar: str) -> bool:
         return argChar in self.booleanArgs
+
+    def isStringArg(self, argChar: str) -> bool:
+        return argChar in self.stringArgs
+
+    def setStringArg(self, argChar: str):
+        self.currentArgument += 1
+        try:
+            self.stringArgs[argChar] = self.args[self.currentArgument]
+        except Exception as e:
+            self.valid = False
+            self.errorArgumentId = argChar
+            raise e
 
     def cardinality(self) -> int:
         return len(self.argsFound)
@@ -109,6 +130,15 @@ class Args:
 
     def getBoolean(self, arg: str) -> bool:
         return self.falseIfNull(self.booleanArgs[arg])
+
+    def blankIfNull(self, s: str) -> str:
+        if s is None:
+            return ''
+        else:
+            return s
+
+    def getString(self, arg: str) -> str:
+        return self.blankIfNull(self.stringArgs[arg])
 
     def has(self, arg: str) -> bool:
         return arg in self.argsFound
