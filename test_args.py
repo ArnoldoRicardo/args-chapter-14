@@ -17,3 +17,10 @@ def tests_paces_in_format():
     assert args.cardinality() == 2
     assert args.has('x')
     assert args.has('y')
+
+
+def test_simple_string_preset():
+    args = Args('x*', ['-x', 'param'])
+    assert args.cardinality() == 1
+    assert args.has('x')
+    assert args.getString('x') == 'param'
