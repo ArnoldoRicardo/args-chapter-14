@@ -12,6 +12,12 @@ def test_simple_boolean_preset():
     assert args.getBoolean('x')
 
 
+def test_boolean_bad_key():
+    args = Args('x', ['-x'])
+    assert args.cardinality() == 1
+    assert args.getBoolean('y') is False
+
+
 def tests_paces_in_format():
     args = Args('x, y', ['-xy'])
     assert args.cardinality() == 2

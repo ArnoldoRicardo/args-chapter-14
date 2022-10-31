@@ -1,4 +1,21 @@
-from typing import Dict, List, Set
+from typing import Dict, Iterator, List, Set, Union
+
+
+class ArgumentMarshaler:
+    value: Union[bool, str, int, float, List[str]]
+
+    def set(self, current_argument: str):
+        pass
+
+
+class BooleanArgumentMarshaler(ArgumentMarshaler):
+    value: bool
+
+    def set(self, value: bool):
+        self.value = True
+
+    def getValue(self) -> bool:
+        return bool(self.value)
 
 
 class Args:
@@ -53,7 +70,7 @@ class Args:
             raise Exception("Bad character:" + elementId + "in Args format: " + self.schema)
 
     def parseBooleanSchemaElement(self, elementId: str):
-        self.booleanArgs[elementId] = False
+        self.booleanArgs[elementId] = BooleanArgumentMarshaler()
 
     def isBooleanSchemaElement(self, elementTail: str) -> bool:
         return len(elementTail) == 0
@@ -96,7 +113,7 @@ class Args:
         return True
 
     def setBooleanArg(self, argChar: str, value: bool):
-        self.booleanArgs[argChar] = value
+        self.booleanArgs[argChar].set(value)
 
     def isBooleanArg(self, argChar: str) -> bool:
         return argChar in self.booleanArgs
@@ -122,14 +139,12 @@ class Args:
         else:
             return ""
 
-    def falseIfNull(self, b: bool) -> bool:
-        if b is None:
-            return False
-        else:
-            return b
-
     def getBoolean(self, arg: str) -> bool:
-        return self.falseIfNull(self.booleanArgs[arg])
+        am = self.booleanArgs.get(arg, None)
+        if am:
+            return am.getValue()
+        else:
+            return False
 
     def blankIfNull(self, s: str) -> str:
         if s is None:
