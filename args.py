@@ -5,16 +5,20 @@ class Args:
     schema: str
     args: List[str]
     valid: bool = True
-    unexpectedArguments: Set[str] = set()
-    booleanArgs: Dict[str, bool] = dict()
-    stringArgs: Dict[str, str] = dict()
-    argsFound: Set[str] = set()
+    unexpectedArguments: Set[str]
+    booleanArgs: Dict[str, bool]
+    stringArgs: Dict[str, str]
+    argsFound: Set[str]
     currentArgument: int
 
     def __init__(self, schema: str, args: List[str]):
         self.schema = schema
         self.args = args
         self.currentArgument = 0
+        self.unexpectedArguments = set()
+        self.booleanArgs = dict()
+        self. stringArgs = dict()
+        self.argsFound = set()
         self.valid = self.parse()
 
     def parse(self) -> bool:
