@@ -35,12 +35,12 @@ class Args:
     args: List[str]
     valid: bool = True
     unexpectedArguments: Set[str]
-    booleanArgs: Dict[str, bool]
-    stringArgs: Dict[str, str]
+    marshalers: Dict[str, ArgumentMarshaler]
     argsFound: Set[str]
     currentArgument: int
 
     def __init__(self, schema: str, args: List[str]):
+        self.marshalers = dict()
         self.schema = schema
         self.args = args
         self.currentArgument = 0
@@ -86,13 +86,13 @@ class Args:
             raise Exception("Bad character:" + elementId + "in Args format: " + self.schema)
 
     def parseBooleanSchemaElement(self, elementId: str):
-        self.booleanArgs[elementId] = BooleanArgumentMarshaler()
+        self.marshalers[elementId] = BooleanArgumentMarshaler()
 
     def isBooleanSchemaElement(self, elementTail: str) -> bool:
         return len(elementTail) == 0
 
     def parseStringSchemaElement(self, elementId: str):
-        self.stringArgs[elementId] = StringArgumentMarshaler()
+        self.marshalers[elementId] = StringArgumentMarshaler()
 
     def isStringSchemaElement(self, elementTail: str) -> bool:
         return elementTail == "*"
@@ -118,10 +118,11 @@ class Args:
             self.valid = False
 
     def setArgument(self, argChar: str) -> bool:
+        m = self.marshalers[argChar]
 
-        if self.isBooleanArg(argChar):
+        if isinstance(m, BooleanArgumentMarshaler):
             self.setBooleanArg(argChar, True)
-        elif self.isStringArg(argChar):
+        elif isinstance(m, StringArgumentMarshaler):
             self.setStringArg(argChar)
         else:
             return False
@@ -129,18 +130,12 @@ class Args:
         return True
 
     def setBooleanArg(self, argChar: str, value: bool):
-        self.booleanArgs[argChar].set(value)
-
-    def isBooleanArg(self, argChar: str) -> bool:
-        return argChar in self.booleanArgs
-
-    def isStringArg(self, argChar: str) -> bool:
-        return argChar in self.stringArgs
+        self.marshalers[argChar].set(value)
 
     def setStringArg(self, argChar: str):
         self.currentArgument += 1
         try:
-            self.stringArgs[argChar].set(self.args[self.currentArgument])
+            self.marshalers[argChar].set(self.args[self.currentArgument])
         except Exception as e:
             self.valid = False
             self.errorArgumentId = argChar
@@ -156,14 +151,14 @@ class Args:
             return ""
 
     def getBoolean(self, arg: str) -> bool:
-        am = self.booleanArgs.get(arg, None)
+        am = self.marshalers.get(arg, None)
         if am:
             return am.getValue()
         else:
             return False
 
     def getString(self, arg: str) -> str:
-        am = self.stringArgs.get(arg, None)
+        am = self.marshalers.get(arg, None)
         if am:
             return am.getValue()
         else:
