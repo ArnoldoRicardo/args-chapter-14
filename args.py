@@ -43,7 +43,7 @@ class Args:
     schema: str
     args: List[str]
     valid: bool = True
-    unexpectedArguments: Set[str] = set()
+    unexpectedArguments: Set[str]
     marshalers: Dict[str, ArgumentMarshaler]
     argsFound: Set[str]
     currentArgument: Iterator[str]
@@ -52,6 +52,7 @@ class Args:
         self.marshalers = dict()
         self.schema = schema
         self.args = args
+        self.unexpectedArguments = set()
         self.argsFound = set()
         self.valid = self.parse()
 
