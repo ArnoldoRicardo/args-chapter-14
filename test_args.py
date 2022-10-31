@@ -15,7 +15,12 @@ def test_simple_boolean_preset():
 def test_boolean_bad_key():
     args = Args('x', ['-x'])
     assert args.cardinality() == 1
-    assert args.getBoolean('y') is False
+    try:
+        args.getBoolean('y')
+        assert False
+    except KeyError as e:
+        print(e)
+        assert True
 
 
 def tests_paces_in_format():
