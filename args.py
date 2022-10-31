@@ -60,7 +60,7 @@ class Args:
 
     def parseSchema(self) -> bool:
         for element in self.schema.split(","):
-            if len(element) > 0:
+            if len(element):
                 trimmedElement = element.strip()
                 self.parseSchemaElement(trimmedElement)
         return True
@@ -70,28 +70,16 @@ class Args:
         elementTail: str = element[1:]
         self.validateSchemaElementId(elementId)
 
-        if self.isBooleanSchemaElement(elementTail):
-            self.parseBooleanSchemaElement(elementId)
-        elif self.isStringSchemaElement(elementTail):
-            self.parseStringSchemaElement(elementId)
+        if len(elementTail) == 0:
+            self.marshalers[elementId] = BooleanArgumentMarshaler()
+        elif elementTail == "*":
+            self.marshalers[elementId] = StringArgumentMarshaler()
         else:
             raise Exception(f"Argument: {elementId} has invalid format: {elementTail}.")
 
     def validateSchemaElementId(self, elementId: str):
         if not elementId.isalpha():
             raise Exception("Bad character:" + elementId + "in Args format: " + self.schema)
-
-    def parseBooleanSchemaElement(self, elementId: str):
-        self.marshalers[elementId] = BooleanArgumentMarshaler()
-
-    def isBooleanSchemaElement(self, elementTail: str) -> bool:
-        return len(elementTail) == 0
-
-    def parseStringSchemaElement(self, elementId: str):
-        self.marshalers[elementId] = StringArgumentMarshaler()
-
-    def isStringSchemaElement(self, elementTail: str) -> bool:
-        return elementTail == "*"
 
     def parseArguments(self) -> bool:
         for arg in self.args:
