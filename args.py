@@ -45,8 +45,6 @@ class Args:
         self.args = args
         self.currentArgument = 0
         self.unexpectedArguments = set()
-        self.booleanArgs = dict()
-        self.stringArgs = dict()
         self.argsFound = set()
         self.valid = self.parse()
 
