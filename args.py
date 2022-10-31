@@ -34,9 +34,9 @@ class Args:
     schema: str
     args: List[str]
     valid: bool = True
-    unexpectedArguments: Set[str] = set()
+    unexpectedArguments: Set[str]
     marshalers: Dict[str, ArgumentMarshaler]
-    argsFound: Set[str] = set()
+    argsFound: Set[str]
     currentArgument: int
 
     def __init__(self, schema: str, args: List[str]):
@@ -44,6 +44,10 @@ class Args:
         self.schema = schema
         self.args = args
         self.currentArgument = 0
+        self.unexpectedArguments = set()
+        self.booleanArgs = dict()
+        self.stringArgs = dict()
+        self.argsFound = set()
         self.valid = self.parse()
 
     def parse(self) -> bool:
