@@ -39,6 +39,40 @@ class StringArgumentMarshaler(ArgumentMarshaler):
             return ""
 
 
+class IntegerArgumentMarshaler(ArgumentMarshaler):
+    value: int
+
+    def set(self, currentargument: Iterator[str]):
+        try:
+            self.value = next(currentargument)
+        except Exception as e:
+            raise e
+
+    @staticmethod
+    def getValue(am: ArgumentMarshaler) -> str:
+        if (am is not None and isinstance(am, ArgumentMarshaler)):
+            return int(am.value)
+        else:
+            return 0
+
+
+class DoubleArgumentMarshaler(ArgumentMarshaler):
+    value: float
+
+    def set(self, currentargument: Iterator[str]):
+        try:
+            self.value = next(currentargument)
+        except Exception as e:
+            raise e
+
+    @staticmethod
+    def getValue(am: ArgumentMarshaler):
+        if (am is not None and isinstance(am, ArgumentMarshaler)):
+            return float(am.value)
+        else:
+            return 0.0
+
+
 class Args:
     schema: str
     args: List[str]
@@ -83,6 +117,10 @@ class Args:
             self.marshalers[elementId] = BooleanArgumentMarshaler()
         elif elementTail == "*":
             self.marshalers[elementId] = StringArgumentMarshaler()
+        elif elementTail == "#":
+            self.marshalers[elementId] = IntegerArgumentMarshaler()
+        elif elementTail == "##":
+            self.marshalers[elementId] = DoubleArgumentMarshaler()
         else:
             raise Exception(f"Argument: {elementId} has invalid format: {elementTail}.")
 
@@ -137,6 +175,12 @@ class Args:
 
     def getString(self, arg: str) -> str:
         return StringArgumentMarshaler.getValue(am=self.marshalers[arg])
+
+    def getInt(self, arg: str) -> int:
+        return IntegerArgumentMarshaler.getValue(am=self.marshalers[arg])
+
+    def getDouble(self, arg: str) -> float:
+        return DoubleArgumentMarshaler.getValue(am=self.marshalers[arg])
 
     def has(self, arg: str) -> bool:
         return arg in self.argsFound

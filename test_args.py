@@ -35,3 +35,17 @@ def test_simple_string_preset():
     assert args.cardinality() == 1
     assert args.has('x')
     assert args.getString('x') == 'param'
+
+
+def test_simple_int_preset():
+    args = Args('x#', ['-x', '42'])
+    assert args.cardinality() == 1
+    assert args.has('x')
+    assert args.getInt('x') == 42
+
+
+def test_simple_doouble_preset():
+    args = Args('x##', ['-x', '42.3'])
+    assert args.cardinality() == 1
+    assert args.has('x')
+    assert args.getDouble('x') == 42.3
